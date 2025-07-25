@@ -1,0 +1,128 @@
+Public isUpdateMode As Boolean
+
+Private Sub Command1_Click()
+    Call openConnection
+
+    If isUpdateMode = False Then
+        ' ----- Normal Donate Mode -----
+        Dim sql As String
+        If Trim(Text1.Text) = "" Or Trim(Text2.Text) = "" Or Trim(Text3.Text) = "" Or Trim(Text4.Text) = "" Then
+            MsgBox "Please complete all fields.", vbExclamation
+            Exit Sub
+        End If
+
+        sql = "INSERT INTO Books (BookID, Title, Author, Genre) VALUES ('" & _
+            Trim(Text1.Text) & "', '" & Trim(Text2.Text) & "', '" & Trim(Text3.Text) & "', '" & Trim(Text4.Text) & "')"
+
+        On Error GoTo ErrorHandler
+        conn.Execute sql
+        MsgBox "Book donated successfully!", vbInformation
+
+        ' Clear fields after donation
+        Text1.Text = ""
+        Text2.Text = ""
+        Text3.Text = ""
+        Text4.Text = ""
+        Exit Sub
+
+    Else
+        ' ----- Update Mode -----
+        Dim rs As ADODB.Recordset
+        Dim bookID As String
+        bookID = Trim(Text1.Text)
+
+        If Command1.Caption = "Search" Then
+            If bookID = "" Then
+                MsgBox "Enter BookID to search.", vbExclamation
+                Exit Sub
+            End If
+
+            Set rs = New ADODB.Recordset
+            rs.Open "SELECT * FROM Books WHERE BookID = '" & bookID & "'", conn, adOpenStatic, adLockReadOnly
+
+            If Not rs.EOF Then
+                ' Show other fields
+                Text2.Visible = True
+                Text3.Visible = True
+                Text4.Visible = True
+                Label1.Visible = True
+                Label3.Visible = True
+                Label4.Visible = True
+
+                ' Populate fields
+                Text2.Text = rs!Title
+                Text3.Text = rs!Author
+                Text4.Text = rs!Genre
+
+                ' Change button to "Update"
+                Command1.Caption = "Update"
+            Else
+                MsgBox "BookID not found.", vbCritical
+            End If
+
+            rs.Close
+            Set rs = Nothing
+
+        ElseIf Command1.Caption = "Update" Then
+            ' Perform the update
+            If Trim(Text2.Text) = "" Or Trim(Text3.Text) = "" Or Trim(Text4.Text) = "" Then
+                MsgBox "Please fill out all fields before updating.", vbExclamation
+                Exit Sub
+            End If
+
+            Dim sqlUpdate As String
+            sqlUpdate = "UPDATE Books SET Title = '" & Trim(Text2.Text) & "', Author = '" & Trim(Text3.Text) & "', Genre = '" & Trim(Text4.Text) & "' WHERE BookID = '" & bookID & "'"
+
+            conn.Execute sqlUpdate
+            MsgBox "Book updated successfully!", vbInformation
+
+            ' Reset form
+            Text1.Text = ""
+            Text2.Text = ""
+            Text3.Text = ""
+            Text4.Text = ""
+
+            Command1.Caption = "Search"
+            Text2.Visible = False
+            Text3.Visible = False
+            Text4.Visible = False
+            Label1.Visible = False
+            Label3.Visible = False
+            Label4.Visible = False
+        End If
+    End If
+
+    Exit Sub
+
+ErrorHandler:
+    MsgBox "Error: " & Err.Description, vbCritical
+End Sub
+
+Private Sub Command2_Click()
+    Unload Me
+    Loginfrm.Show
+End Sub
+
+Private Sub Form_Load()
+    If isUpdateMode = True Then
+        ' Start in Search Mode
+        Text2.Visible = False
+        Text3.Visible = False
+        Text4.Visible = False
+        Label1.Visible = False
+        Label3.Visible = False
+        Label4.Visible = False
+        Command1.Caption = "Search"
+    Else
+        ' Normal Donate Mode
+        Text2.Visible = True
+        Text3.Visible = True
+        Text4.Visible = True
+        Label1.Visible = True
+        Label3.Visible = True
+        Label4.Visible = True
+        Command1.Caption = "Donate"
+    End If
+End Sub
+
+
