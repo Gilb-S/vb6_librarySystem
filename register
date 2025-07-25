@@ -1,0 +1,43 @@
+Private Sub Command1_Click()
+Unload Me
+Frontpage.Show
+End Sub
+
+Private Sub Command3_Click()
+Call openConnection
+
+    Dim sql As String
+    Dim email As String
+    Dim pass As String
+
+    email = Trim(Text1.Text)
+    pass = Trim(Text2.Text)
+
+    If email = "" Or pass = "" Then
+        MsgBox "Please fill in all fields.", vbExclamation, "Input Required"
+        Exit Sub
+    End If
+
+    sql = "INSERT INTO LibraryUser (Email, [Password]) " & _
+          "VALUES ('" & email & "', '" & pass & "')"
+
+    On Error GoTo SaveError
+
+    conn.Execute sql
+    MsgBox "User registered successfully!", vbInformation, "Success"
+    
+    Text1.Text = ""
+    Text2.Text = ""
+    Exit Sub
+
+SaveError:
+    MsgBox "Error saving user: " & Err.Description, vbCritical, "Database Error"
+End Sub
+
+Private Sub Form_Load()
+
+End Sub
+
+Private Sub Text2_Change()
+Text2.PasswordChar = "*"
+End Sub
