@@ -1,0 +1,41 @@
+Private Sub Command1_Click()
+Call openConnection
+Dim rs As ADODB.Recordset
+Dim sql As String
+Dim email As String
+Dim pass As String
+
+email = Text1.Text
+pass = Text2.Text
+
+sql = "SELECT * FROM LibraryUser WHERE Email = '" & email & "' AND Password = '" & pass & "'"
+Set rs = New ADODB.Recordset
+rs.Open sql, conn, adOpenStatic, adLockReadOnly
+
+If Not rs.EOF Then
+    MsgBox "Welcome to jessa mae library", vbInformation, "Welcome"
+    Loginfrm.Show
+    rs.Close
+    Set rs = Nothing
+    Unload Me
+Else
+    MsgBox "Wrong email or password", vbCritical, "Error"
+End If
+End Sub
+
+Private Sub Command2_Click()
+End
+End Sub
+
+Private Sub Command3_Click()
+Register.Show
+Unload Me
+End Sub
+
+Private Sub Form_Load()
+
+End Sub
+
+Private Sub Text2_Change()
+Text2.PasswordChar = "*"
+End Sub
